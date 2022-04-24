@@ -7,8 +7,6 @@ namespace chat.Hubs
 {
     public class ChatHub : Hub
     {
-        Regex regexPattern = new Regex("^/stock=(.*)$");
-
         public async Task SendMessage(string user, string message)
         {
             if (IsMessageACommand(message))
@@ -17,8 +15,15 @@ namespace chat.Hubs
                 await Clients.All.SendAsync("ReceiveMessage", user, message);
         }
 
+        public override async Task OnConnectedAsync()
+        {
+            await Clients.Caller.SendAsync("ReceiveMessage", "Robot", "Welcome to the chat!");
+            await base.OnConnectedAsync();
+        }
+
         private bool IsMessageACommand(string message)
         {
+            Regex regexPattern = new Regex("^/stock=(.*)$");
             return regexPattern.IsMatch(message);
         }
 
@@ -36,7 +41,6 @@ namespace chat.Hubs
                 var body = Encoding.UTF8.GetBytes(stockCode);
 
                 channel.BasicPublish(exchange: "", routingKey: "stock_search", body: body);
-                Console.WriteLine(" [x] Sent {0}", message);
             }
         }
     }

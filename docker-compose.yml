@@ -1,0 +1,32 @@
+version: "3.9"
+services:
+  rabbitmq:
+    image: rabbitmq:3.9-management
+    container_name: rabbitmq
+    hostname: rabbit_server
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - wfx
+  stock-bot:
+    build: ./stock-bot/stock-bot
+    container_name: stock-bot
+    restart: on-failure
+    depends_on: 
+      - rabbitmq
+    networks: 
+      - wfx
+  signal-r:
+    build: ./signalr-chat/chat
+    container_name: signal-r
+    restart: on-failure
+    depends_on: 
+      - rabbitmq    
+    ports:
+      - "7240:80"
+    networks: 
+      - wfx
+
+networks:
+  wfx:    
