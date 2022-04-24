@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "gn7+1X/9lXxSmYoQ1PXHvT3jSLy3ekNEYZ9igYFI44rQ5TGGLK+3kX4rtVRWz9un7fBRTcdep9HDzVIG4pGapw==",
+  "success": true,
+  "projectFilePath": "C:\\welington-dev\\Tech Challenges\\JobsityChallenge\\signalr-chat\\chat\\chat.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Welington\\.nuget\\packages\\rabbitmq.client\\6.2.4\\rabbitmq.client.6.2.4.nupkg.sha512",
+    "C:\\Users\\Welington\\.nuget\\packages\\system.memory\\4.5.4\\system.memory.4.5.4.nupkg.sha512",
+    "C:\\Users\\Welington\\.nuget\\packages\\system.threading.channels\\4.7.1\\system.threading.channels.4.7.1.nupkg.sha512"
+  ],
+  "logs": []
+}
