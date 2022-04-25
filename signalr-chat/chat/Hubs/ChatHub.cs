@@ -12,12 +12,12 @@ namespace chat.Hubs
             if (IsMessageACommand(message))
                 await SendMassageToStockWorker(message);
             else
-                await Clients.All.SendAsync("ReceiveMessage", user, message);
+                await Clients.All.SendAsync("ReceiveMessage", DateTime.Now, user, message);
         }
 
         public override async Task OnConnectedAsync()
         {
-            await Clients.Caller.SendAsync("ReceiveMessage", "Robot", "Welcome to the chat!");
+            await Clients.Caller.SendAsync("ReceiveMessage", DateTime.Now, "Robot", "Welcome to the chat!");
             await base.OnConnectedAsync();
         }
 
@@ -32,7 +32,7 @@ namespace chat.Hubs
             var split = message.Split('=');
             var stockCode = split[1];
 
-            var factory = new ConnectionFactory() { HostName = "localhost", Port = 5672 };
+            var factory = new ConnectionFactory() { HostName = "rabbit_server", Port = 5672 };
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
             {

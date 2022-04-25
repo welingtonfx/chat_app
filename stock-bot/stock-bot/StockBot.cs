@@ -1,11 +1,5 @@
-﻿using CsvHelper;
-using CsvHelper.Configuration;
-using System.Globalization;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
-using System.Text;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace stock_bot
 {

@@ -18,7 +18,7 @@ namespace chat
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             //RabbitMQ
-            var factory = new ConnectionFactory() { HostName = "localhost", Port = 5672 };
+            var factory = new ConnectionFactory() { HostName = "rabbit_server", Port = 5672 };
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
             {
@@ -30,7 +30,7 @@ namespace chat
                     var body = ea.Body.ToArray();
                     var message = Encoding.UTF8.GetString(body);
 
-                    _chatHub.Clients.All.SendAsync("ReceiveMessage", "Robot", message);
+                    _chatHub.Clients.All.SendAsync("ReceiveMessage", DateTime.Now, "Robot", message);
                 };
                 channel.BasicConsume(queue: "chat_hub", autoAck: true, consumer: consumer);
 
