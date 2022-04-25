@@ -1,0 +1,111 @@
+# Chat Application
+
+This is a basic Chat application developed to Jobsity Challenge
+
+
+# Requirements
+
+Develop a basic webchat application where users must log in to have access to the chat room. Users can exchange messages and send a command to the chat. Command "/stock=aapl.us" brings the current stock information for Apple, for example.
+
+# Components
+
+Application was divided in 3 main components:
+**SignalR + Login Application** - Chat + Login features
+**Stock-Bot** - Standalone bot that read information about stocks from API
+**RabbitMQ** - Resposible for exchanging message from/to Stock-Bot
+
+# How it works?
+
+## Stock-Bot
+It`s a Worker developer in ASPNET 6 that receives/sends messages from/to RabbitMQ. When a user sends a command, like "/stock=goog.us", the information is sent to the "stock_search" queue. Stock-Bot listens to this queue and queries an API to retrieve stock information. After that, bot sends the response to the "chat_hub" queue.
+
+## SignalR + Login Application
+Developed with ASPNET 6, this application has SignalR to connect all the logged users in the chat room. It also manages login with Microsoft Identity. This application feed the "stock_queue" when detects a command being received from chat room. It also listens to the queue "chat_hub" to get messages from Stock-Bot. Those messages are sent to chat room via SignalR.
+Simple message are not sent to Stock-Bot. It is received by this application and broadcasted via SignalR.
+
+## RabbitMQ
+Responsible for exchanging messages from Chat Room and Stock-Bot.
+
+
+# How to run the app?
+Application is dockerized, so the best way is using docker-compose.
+Go to the root of the app in a command prompt and run:
+
+Build the app:
+
+    docker-compose build --no-chace
+
+Run the 3 containers:
+
+    docker-compose up
+
+Notice that the first container to be loaded is RabbitMQ. The other 2 containers depend on it. It is normal to see erros on the promp for the other 2 containers while RabbitMQ is loading. Those containers will be restarted automatically a few times. Everything should work fine in a few seconds.
+
+After that, you can access the application with the address:
+http://localhost:7240
+
+App address protocol is http, not https!
+
+# Can I run without Docker?
+Yes, but it`s a little trickier.
+You have to install RabbitMQ on your localhost with default user and pass (guest/guest). It listens on the port 5672 (default).
+
+After it is running, you need to change the "Hostname" address in 3 different parts of the ASPNET apps:
+**Stock-Bot app:** 
+- Open the file Worker.cs and change the Hostname from "rabbit_server" to "localhost"
+
+**Signal-R Chat app:**
+- Open the file ChatHub.cs and change the hostname on the method "SendMassageToStockWorker"
+- Open the file ChatWorker.cs and change the hostname on the method "ExecuteAsync"
+
+Application components should be started in the following order:
+1) RabbitMQ (you should wait a few seconds so it loads completely)
+2) Stock-Bot
+3) Signal-R
+
+If stock-bot or signal-r fails, probable cause is the wrong hostname.
+
+Let me know in case of doubts / problems
+
+## How to use the application?
+
+App is separated in 3 parts: Register, Login and Chat Room.
+You should first Register your user. After that you will be redirected to log in. After Log in, you can start sending your messages on chat room. 
+
+If you try to access chat room without being logged in, you will be redirected.
+
+Data inserted on register and login forms are not validated at all due time constraints. So make sure to insert pristine data on it.
+
+
+# Features
+Completed:
+1) User login
+2) Send command via chat
+3) Decoupled bot API (stock-bot)
+4) Bot sends custom message to chat
+5) Messages ordered by timestamp**
+
+Not completed:
+1) Unit test
+
+Bonus completed:
+1) Microsoft Identity used for the login functionality
+2) Wrong stock symbols by the bot causes a friendly error message to be returned
+3) Build an installer (docker-compose)
+
+Note:
+For user registration, I used InMemory database, so I don't have to setup a new component (real database).
+** Chat messages are not stored. They are real-time messages only. User can see 50 messages at most. There`s a login on front end to remove older messages from the list. 
+
+# Technical Debts / Improvements
+Due time restriction I was not able to introduce features I'd like, such as:
+
+- Storing chat messages in a real DB 
+- Storing users in real DB instead of InMemory
+- Refactoring ASPNET app code in order add patterns such as Repository
+- Grab connection string information from ConnectionManager instead of hardcoding
+- Insert data validation on all html fields
+- More attention to secure information such as password encryption
+- Using SOLID concepts widely
+
+Welington
