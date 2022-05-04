@@ -10,18 +10,20 @@ Develop a basic webchat application where users must log in to have access to th
 # Components
 
 Application was divided in 3 main components:
-**SignalR + Login Application** - Chat + Login features
-**Stock-Bot** - Standalone bot that read information about stocks from API
-**RabbitMQ** - Resposible for exchanging message from/to Stock-Bot
+- SignalR and Login Application -> Chat + Login features
+- Stock-Bot -> Standalone bot that read information about stocks from API
+- RabbitMQ -> Resposible for exchanging message from/to Stock-Bot
 
 # How it works?
 
 ## Stock-Bot
-It`s a Worker developer in ASPNET 6 that receives/sends messages from/to RabbitMQ. When a user sends a command, like "/stock=goog.us", the information is sent to the "stock_search" queue. Stock-Bot listens to this queue and queries an API to retrieve stock information. After that, bot sends the response to the "chat_hub" queue.
+It`s a Worker developed in ASPNET 6 that receives/sends messages from/to RabbitMQ. When a user sends a command, like "/stock=goog.us", the information is sent to the "stock_search" queue in RabbitMQ. Stock-Bot listens to this queue and queries an API to retrieve stock information. After that, bot sends the response back to RabbitMQ this time to the "chat_hub" queue.
 
 ## SignalR + Login Application
-Developed with ASPNET 6, this application has SignalR to connect all the logged users in the chat room. It also manages login with Microsoft Identity. This application feed the "stock_queue" when detects a command being received from chat room. It also listens to the queue "chat_hub" to get messages from Stock-Bot. Those messages are sent to chat room via SignalR.
-Simple message are not sent to Stock-Bot. It is received by this application and broadcasted via SignalR.
+Developed with ASPNET 6, this application has SignalR to connect all the logged users in the chat room. It also manages login with Microsoft Identity. 
+When this application receives a command from the chat room, it sends the message to the "stock_queue". It also listens to the queue "chat_hub" to get messages from Stock-Bot. After receiving messages from the bot, the app redirects the message to the chat room via SignalR.
+
+Simple messages (not commands) are not sent to Stock-Bot. They are received by this application and broadcasted via SignalR directly.
 
 ## RabbitMQ
 Responsible for exchanging messages from Chat Room and Stock-Bot.
@@ -33,13 +35,13 @@ Go to the root of the app in a command prompt and run:
 
 Build the app:
 
-    docker-compose build --no-chace
+    docker-compose build --no-cache
 
 Run the 3 containers:
 
     docker-compose up
 
-Notice that the first container to be loaded is RabbitMQ. The other 2 containers depend on it. It is normal to see erros on the promp for the other 2 containers while RabbitMQ is loading. Those containers will be restarted automatically a few times. Everything should work fine in a few seconds.
+Notice that the first container to be loaded is RabbitMQ. The other 2 containers depend on it. It is normal to see errors on the prompt for the other 2 containers while RabbitMQ is loading. Those containers will be restarted automatically a few times. Everything should work fine in a few seconds.
 
 After that, you can access the application with the address:
 http://localhost:7240
@@ -93,9 +95,9 @@ Bonus completed:
 2) Wrong stock symbols by the bot causes a friendly error message to be returned
 3) Build an installer (docker-compose)
 
-Note:
-For user registration, I used InMemory database, so I don't have to setup a new component (real database).
-** Chat messages are not stored. They are real-time messages only. User can see 50 messages at most. There`s a login on front end to remove older messages from the list. 
+Notes:
+For user registration, I use InMemory database, so I don't have to setup a new component (real database).
+** Chat messages are not persisted. They are real-time messages only. User can see 50 messages at most. There`s a logic on front-end to remove older messages from the list. 
 
 # Technical Debts / Improvements
 Due time restriction I was not able to introduce features I'd like, such as:
@@ -103,7 +105,7 @@ Due time restriction I was not able to introduce features I'd like, such as:
 - Storing chat messages in a real DB 
 - Storing users in real DB instead of InMemory
 - Refactoring ASPNET app code in order add patterns such as Repository
-- Grab connection string information from ConnectionManager instead of hardcoding
+- Grab connection string information from ConfigurationManager instead of hardcoding
 - Insert data validation on all html fields
 - More attention to secure information such as password encryption
 - Using SOLID concepts widely
